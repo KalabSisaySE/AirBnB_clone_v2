@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -73,7 +74,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] is '{' and pline[-1] is '}' \
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -115,13 +116,51 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
+        all_args = shlex.split(args)
+
+        if not all_args[0]:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        elif all_args[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+
+        def isfloat(num):
+            """return true if `num` can be converted to a float"""
+            try:
+                float(num)
+                return True
+            except ValueError:
+                return False
+
+        i = 1
+        dictionary = {}
+        while (i < len(all_args)):
+            arr = all_args[i].split('=')
+
+            if arr[1].startswith('"'):
+                arr[1] = arr[1].replace('"', '')
+
+            # skip the param if value contains spaces
+            if arr[1].find(' ') != -1:
+                continue
+
+            if arr[1].find('_') != -1:
+                arr[1] = arr[1].replace('_', ' ')
+
+            if arr[1].isnumeric() or isfloat(arr[1]):
+                if arr[1].find('.') != -1:
+                    arr[1] = float(arr[1])
+                else:
+                    arr[1] = int(arr[1])
+
+            dictionary.update({arr[0]: arr[1]})
+            i = i + 1
+
+        new_instance = HBNBCommand.classes[all_args[0]]()
+        di = new_instance.to_dict()
+        di.update(**dictionary)
+        new_instance = HBNBCommand.classes[all_args[0]](**di)
         storage.save()
         print(new_instance.id)
         storage.save()
@@ -187,7 +226,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del storage.all()[key]
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -319,6 +358,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
