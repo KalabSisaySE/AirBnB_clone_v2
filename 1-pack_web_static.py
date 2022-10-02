@@ -21,4 +21,4 @@ def do_pack():
     else:
         local("chmod g+w versions/web_static_{}.tgz web_static".
               format(formatted_time))
-        return "versions/web_static_{}.tgz web_static".format(formatted_time)
+        return "versions/web_static_{}.tgz".format(formatted_time)
