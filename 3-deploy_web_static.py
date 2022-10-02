@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """the `3-deploy_web_static` module
 defines the function `deploy`
 """
