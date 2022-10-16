@@ -15,7 +15,13 @@ from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 
 
 class DBStorage:
-    """database storage part of the storage engine"""
+    """database storage part of the storage engine
+
+    Attributes:
+        __engine (sqlalchemy.Engine): The working SQLAlchemy engine
+        __session (sqlalchemy.Session): The working SQLAlchemy session
+    """
+
     __engine = None
     __session = None
 
